@@ -1,0 +1,50 @@
+name: Release Hardening
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  provenance-sbom-sign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package source archive
+        run: |
+          mkdir -p dist
+          tar --exclude=.git -czf dist/source.tgz .
+          sha256sum dist/source.tgz > dist/source.tgz.sha256
+
+      - name: Install syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Generate SBOM (SPDX JSON)
+        run: syft dir:. -o spdx-json > dist/sbom.spdx.json
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign source and SBOM (keyless)
+        run: |
+          cosign sign-blob --yes --output-signature dist/source.tgz.sig --output-certificate dist/source.tgz.pem dist/source.tgz
+          cosign sign-blob --yes --output-signature dist/sbom.spdx.json.sig --output-certificate dist/sbom.spdx.json.pem dist/sbom.spdx.json
+
+      - name: Generate provenance attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/source.tgz
+
+      - name: Upload release hardening artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-hardening-artifacts
+          path: dist/*
