@@ -12,11 +12,15 @@ import (
 )
 
 type ApiError struct {
-    Status int
-    Body   string
+    Status  int
+    Body    string
+    TraceID string
 }
 
 func (e *ApiError) Error() string {
+    if e.TraceID != "" {
+        return fmt.Sprintf("HTTP %d: %s (trace_id=%s)", e.Status, e.Body, e.TraceID)
+    }
     return fmt.Sprintf("HTTP %d: %s", e.Status, e.Body)
 }
 
@@ -64,7 +68,7 @@ func (c *Client) request(method, path string, body any, accept string) (*http.Re
             }
             return nil, err
         }
-        if (resp.StatusCode == 429 || resp.StatusCode >= 500) && attempt < c.MaxRetries {
+        if ShouldRetryTransientHTTP(method, resp.StatusCode) && attempt < c.MaxRetries {
             _ = resp.Body.Close()
             time.Sleep(time.Duration(200*(attempt+1)) * time.Millisecond)
             continue
@@ -72,7 +76,11 @@ func (c *Client) request(method, path string, body any, accept string) (*http.Re
         if resp.StatusCode >= 400 {
             raw, _ := io.ReadAll(resp.Body)
             _ = resp.Body.Close()
-            return nil, &ApiError{Status: resp.StatusCode, Body: string(raw)}
+            trace := resp.Header.Get("X-Trace-Id")
+            if trace == "" {
+                trace = resp.Header.Get("x-trace-id")
+            }
+            return nil, &ApiError{Status: resp.StatusCode, Body: string(raw), TraceID: trace}
         }
         return resp, nil
     }
