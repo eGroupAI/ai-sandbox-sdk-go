@@ -10,6 +10,7 @@ This SDK is designed for low-change, low-touch customer integration.
 ## Retry safety
 - **429 / 5xx** automatic retries apply only to **GET** and **HEAD**. **POST / PUT / PATCH** are not retried on those status codes to avoid duplicate side effects.
 - **Transport** errors may still be retried for all methods, up to `MaxRetries`.
+- Retry delay uses **exponential backoff** with a capped wait time.
 
 ## Install
 `go get github.com/eGroupAI/ai-sandbox-sdk-go`
