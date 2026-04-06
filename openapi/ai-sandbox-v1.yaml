@@ -1,0 +1,185 @@
+openapi: 3.1.0
+info:
+  title: AI Sandbox Integration API
+  version: 1.0.0
+  description: |
+    Official AI Sandbox integration contract for external customers.
+servers:
+  - url: https://www.egroupai.com
+    description: Production host
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+  schemas:
+    Agent:
+      type: object
+      properties:
+        agentId:
+          type: integer
+        agentDisplayName:
+          type: string
+        agentDescription:
+          type: string
+        agentStatus:
+          type: string
+    ChatMessage:
+      type: object
+      properties:
+        message:
+          type: string
+        channelId:
+          type: string
+        stream:
+          type: boolean
+    KnowledgeBase:
+      type: object
+      properties:
+        agentCollectionId:
+          type: integer
+        collectionId:
+          type: integer
+        collectionName:
+          type: string
+        isActive:
+          type: boolean
+paths:
+  /api/v1/agents:
+    post:
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agent'
+      responses:
+        "201":
+          description: Created
+    get:
+      operationId: listAgents
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/{agentId}:
+    parameters:
+      - in: path
+        name: agentId
+        required: true
+        schema:
+          type: integer
+    put:
+      operationId: updateAgent
+      responses:
+        "200":
+          description: OK
+    get:
+      operationId: getAgentDetail
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/{agentId}/channels:
+    post:
+      operationId: createChatChannel
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+  /api/v1/agents/{agentId}/chat:
+    post:
+      operationId: sendChat
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+      responses:
+        "200":
+          description: OK
+        "206":
+          description: SSE Stream
+  /api/v1/agents/{agentId}/channels/{channelId}/messages:
+    get:
+      operationId: getChatHistory
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: channelId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/{agentId}/collections:
+    post:
+      operationId: createKnowledgeBase
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Created
+    get:
+      operationId: listKnowledgeBases
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+  /api/v1/agent-collections/{agentCollectionId}/status:
+    patch:
+      operationId: updateKnowledgeBaseStatus
+      parameters:
+        - in: path
+          name: agentCollectionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/{agentId}/collections/{collectionId}/articles:
+    get:
+      operationId: getKnowledgeBaseArticles
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: collectionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
