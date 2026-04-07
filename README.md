@@ -93,3 +93,7 @@ go get github.com/eGroupAI/ai-sandbox-sdk-go
 - [Integration Guide](docs/INTEGRATION.md)
 - [Quickstart Example](examples/quickstart/main.go)
 - [Repository](https://github.com/eGroupAI/ai-sandbox-sdk-go)
+
+## License
+
+This SDK is released under the Apache-2.0 license.
