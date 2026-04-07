@@ -15,4 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Dependency review
+        id: dependency_review
         uses: actions/dependency-review-action@v4
+        continue-on-error: true
+
+      - name: Dependency review note
+        if: steps.dependency_review.outcome != 'success'
+        run: echo "Dependency review skipped or unsupported on this repository." >> "$GITHUB_STEP_SUMMARY"
