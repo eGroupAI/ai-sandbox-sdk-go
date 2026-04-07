@@ -76,6 +76,12 @@ func getenv(key, fallback string) string {
 go get github.com/eGroupAI/ai-sandbox-sdk-go
 ```
 
+## Integration Sanity Checklist
+
+- Set `AI_SANDBOX_API_KEY` in runtime secrets, not in source code.
+- Keep `AI_SANDBOX_BASE_URL` aligned with your target environment.
+- Validate stream handling for `[DONE]` before production rollout.
+
 ## Snapshot
 
 | Metric | Value |
@@ -89,6 +95,7 @@ go get github.com/eGroupAI/ai-sandbox-sdk-go
 ## Links
 
 - [Official System Integration Docs](https://www.egroupai.com/ai-sandbox/system-integration)
+- [Public Capability Showcase](https://github.com/a6091731/ai-sandbox-public-showcase)
 - [30-Day Optimization Plan](docs/30D_OPTIMIZATION_PLAN.md)
 - [Integration Guide](docs/INTEGRATION.md)
 - [Quickstart Example](examples/quickstart/main.go)
