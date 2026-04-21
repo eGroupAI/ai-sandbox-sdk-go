@@ -39,7 +39,7 @@ jobs:
           cosign sign-blob --yes --output-signature dist/sbom.spdx.json.sig --output-certificate dist/sbom.spdx.json.pem dist/sbom.spdx.json
 
       - name: Generate provenance attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/source.tgz
 
